@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ personal_info.full_name|default:cv.title }} — CV</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @page {
+      size: A4;
+      margin: 18mm 16mm 16mm 16mm;
+    }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 10pt;
+      color: #1a1a1a;
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    /* ── Header ───────────────────────────────────────────────── */
+    .header {
+      text-align: center;
+      border-bottom: 2.5pt solid #8b0000;
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+
+    .header-flex {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .header-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #8b0000;
+    }
+
+    .header-text { text-align: left; }
+
+    .header h1 {
+      font-size: 22pt;
+      font-weight: 700;
+      color: #8b0000;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+
+    .header-divider {
+      height: 1pt;
+      background: #c4a882;
+      margin: 6px 0;
+    }
+
+    .contact-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px 20px;
+      font-size: 8.5pt;
+      color: #555;
+      margin-top: 8px;
+    }
+
+    .contact-bar span {
+      white-space: nowrap;
+    }
+
+    .contact-bar .sep {
+      color: #c4a882;
+    }
+
+    /* ── Section ──────────────────────────────────────────────── */
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 11pt;
+      font-weight: 700;
+      color: #8b0000;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 1pt solid #8b0000;
+      padding-bottom: 4px;
+      margin-bottom: 12px;
+    }
+
+    /* ── Timeline Entry ───────────────────────────────────────── */
+    .entry {
+      margin-bottom: 14px;
+    }
+
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .entry-title {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .entry-date {
+      font-size: 8.5pt;
+      color: #666;
+      font-style: italic;
+      white-space: nowrap;
+    }
+
+    .entry-subtitle {
+      font-size: 9.5pt;
+      color: #8b0000;
+      font-style: italic;
+      margin-top: 1px;
+    }
+
+    .entry-meta {
+      font-size: 8.5pt;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .entry-description {
+      font-size: 9pt;
+      color: #333;
+      margin-top: 5px;
+      line-height: 1.6;
+      text-align: justify;
+    }
+
+    .entry-separator {
+      border: none;
+      border-top: 0.5pt solid #e0d5c5;
+      margin: 10px 0;
+    }
+
+    /* ── Two-column layout (Skills / Languages) ───────────────── */
+    .two-col {
+      display: flex;
+      gap: 30px;
+    }
+
+    .two-col .col { flex: 1; }
+
+    /* Skills table style */
+    .skill-group {
+      margin-bottom: 10px;
+    }
+
+    .skill-group-name {
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: #8b0000;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .skill-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      padding: 1px 0;
+      border-bottom: 0.5pt dotted #e0d5c5;
+    }
+
+    .skill-row:last-child { border-bottom: none; }
+
+    .skill-name-text {
+      font-size: 9pt;
+      color: #1a1a1a;
+    }
+
+    .skill-level-badge {
+      font-size: 7.5pt;
+      color: #fff;
+      background: #8b0000;
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .skill-level-badge.beginner    { background: #b5854c; }
+    .skill-level-badge.intermediate { background: #5a7a8a; }
+    .skill-level-badge.advanced    { background: #2a6052; }
+    .skill-level-badge.expert      { background: #8b0000; }
+
+    /* Languages */
+    .lang-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .lang-table td {
+      padding: 4px 0;
+      font-size: 9pt;
+      border-bottom: 0.5pt dotted #e0d5c5;
+    }
+
+    .lang-table tr:last-child td { border-bottom: none; }
+
+    .lang-table .lang-name-col { color: #1a1a1a; font-weight: 600; }
+    .lang-table .lang-level-col {
+      text-align: right;
+      color: #8b0000;
+      font-style: italic;
+    }
+
+    /* ── Certificates ─────────────────────────────────────────── */
+    .cert-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .cert-card {
+      flex: 1;
+      min-width: 160px;
+      border: 0.5pt solid #d0c0a0;
+      border-left: 3pt solid #8b0000;
+      padding: 8px 10px;
+      background: #fdfaf5;
+    }
+
+    .cert-name {
+      font-size: 9.5pt;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .cert-issuer {
+      font-size: 8.5pt;
+      color: #8b0000;
+      font-style: italic;
+    }
+
+    .cert-dates {
+      font-size: 8pt;
+      color: #777;
+      margin-top: 3px;
+    }
+
+    .cert-url {
+      font-size: 7.5pt;
+      color: #8b0000;
+      word-break: break-all;
+      margin-top: 2px;
+    }
+
+    /* ── Summary ──────────────────────────────────────────────── */
+    .summary-text {
+      font-size: 9.5pt;
+      color: #333;
+      text-align: justify;
+      line-height: 1.7;
+      font-style: italic;
+      padding: 10px 14px;
+      border-left: 3pt solid #8b0000;
+      background: #fdfaf5;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      font-size: 7pt;
+      color: #aaa;
+      margin-top: 24px;
+      padding-top: 8px;
+      border-top: 0.5pt solid #d0c0a0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────── -->
+<div class="header">
+  <div class="header-flex">
+    {% if personal_info and personal_info.profile_picture %}
+      <img class="header-avatar" src="{{ personal_info.profile_picture.url }}" alt="Profile" />
+    {% endif %}
+    <div class="header-text">
+      <h1>{{ personal_info.full_name|default:"Your Name" }}</h1>
+      <div class="header-divider"></div>
+    </div>
+  </div>
+
+  <div class="contact-bar">
+    {% if personal_info %}
+      {% if personal_info.email %}<span>{{ personal_info.email }}</span>{% endif %}
+      {% if personal_info.phone %}<span class="sep">|</span><span>{{ personal_info.phone }}</span>{% endif %}
+      {% if personal_info.city or personal_info.country %}
+        <span class="sep">|</span>
+        <span>{{ personal_info.city }}{% if personal_info.city and personal_info.country %}, {% endif %}{{ personal_info.country }}</span>
+      {% endif %}
+      {% if personal_info.linkedin %}<span class="sep">|</span><span>{{ personal_info.linkedin }}</span>{% endif %}
+      {% if personal_info.github %}<span class="sep">|</span><span>{{ personal_info.github }}</span>{% endif %}
+      {% if personal_info.website %}<span class="sep">|</span><span>{{ personal_info.website }}</span>{% endif %}
+    {% endif %}
+  </div>
+</div>
+
+<!-- ── Summary ─────────────────────────────────────────────────── -->
+{% if personal_info and personal_info.summary %}
+<div class="section">
+  <div class="section-title">Professional Summary</div>
+  <div class="summary-text">{{ personal_info.summary }}</div>
+</div>
+{% endif %}
+
+<!-- ── Experience ──────────────────────────────────────────────── -->
+{% if experiences %}
+<div class="section">
+  <div class="section-title">Professional Experience</div>
+  {% for exp in experiences %}
+  <div class="entry">
+    <div class="entry-header">
+      <span class="entry-title">{{ exp.position }}</span>
+      <span class="entry-date">
+        {{ exp.start_date|date:"F Y" }} –
+        {% if exp.is_current %}Present{% else %}{{ exp.end_date|date:"F Y" }}{% endif %}
+      </span>
+    </div>
+    <div class="entry-subtitle">
+      {{ exp.company }}{% if exp.location %} &middot; {{ exp.location }}{% endif %}
+    </div>
+    {% if exp.description %}
+    <div class="entry-description">{{ exp.description|linebreaksbr }}</div>
+    {% endif %}
+  </div>
+  {% if not forloop.last %}<hr class="entry-separator" />{% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ── Education ───────────────────────────────────────────────── -->
+{% if education %}
+<div class="section">
+  <div class="section-title">Education</div>
+  {% for edu in education %}
+  <div class="entry">
+    <div class="entry-header">
+      <span class="entry-title">{{ edu.degree }}{% if edu.field_of_study %} in {{ edu.field_of_study }}{% endif %}</span>
+      <span class="entry-date">
+        {{ edu.start_date|date:"Y" }} –
+        {% if edu.is_current %}Present{% else %}{{ edu.end_date|date:"Y" }}{% endif %}
+      </span>
+    </div>
+    <div class="entry-subtitle">{{ edu.institution }}</div>
+    {% if edu.gpa %}<div class="entry-meta">GPA: {{ edu.gpa }}</div>{% endif %}
+    {% if edu.description %}<div class="entry-description">{{ edu.description }}</div>{% endif %}
+  </div>
+  {% if not forloop.last %}<hr class="entry-separator" />{% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ── Skills & Languages side by side ────────────────────────── -->
+{% if skills or languages %}
+<div class="two-col">
+
+  {% if skills %}
+  <div class="col">
+    <div class="section">
+      <div class="section-title">Skills</div>
+      {% for cat, cat_skills in skill_categories.items %}
+      <div class="skill-group">
+        {% if skill_categories|length > 1 %}
+        <div class="skill-group-name">{{ cat }}</div>
+        {% endif %}
+        {% for skill in cat_skills %}
+        <div class="skill-row">
+          <span class="skill-name-text">{{ skill.name }}</span>
+          <span class="skill-level-badge {{ skill.level }}">{{ skill.get_level_display }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if languages %}
+  <div class="col">
+    <div class="section">
+      <div class="section-title">Languages</div>
+      <table class="lang-table">
+        {% for lang in languages %}
+        <tr>
+          <td class="lang-name-col">{{ lang.name }}</td>
+          <td class="lang-level-col">{{ lang.get_proficiency_display }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endif %}
+
+<!-- ── Certificates ────────────────────────────────────────────── -->
+{% if certificates %}
+<div class="section">
+  <div class="section-title">Certifications &amp; Awards</div>
+  <div class="cert-grid">
+    {% for cert in certificates %}
+    <div class="cert-card">
+      <div class="cert-name">{{ cert.name }}</div>
+      <div class="cert-issuer">{{ cert.issuer }}</div>
+      <div class="cert-dates">
+        {{ cert.issue_date|date:"M Y" }}
+        {% if cert.expiry_date %} – {{ cert.expiry_date|date:"M Y" }}{% endif %}
+      </div>
+      {% if cert.credential_url %}
+      <div class="cert-url">{{ cert.credential_url }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="footer">
+  Generated by TezCV.uz &nbsp;·&nbsp; {{ cv.title }}
+</div>
+
+</body>
+</html>
