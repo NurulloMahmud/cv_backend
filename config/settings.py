@@ -77,7 +77,19 @@ DATABASES = {}
 # MongoDB via mongoengine
 # ---------------------------------------------------------------------------
 MONGODB_URI = config('MONGODB_URI', default='mongodb://localhost:27017/tezcv_dev')
-mongoengine.connect(host=MONGODB_URI, alias='default')
+
+try:
+    mongoengine.connect(host=MONGODB_URI, alias='default')
+except Exception as _mongo_exc:
+    import sys
+    print(
+        f'\n[FATAL] Could not connect to MongoDB.\n'
+        f'  URI: {MONGODB_URI[:60]}...\n'
+        f'  Error: {_mongo_exc}\n'
+        f'  Fix: set the MONGODB_URI environment variable to your real Atlas connection string.\n',
+        file=sys.stderr,
+    )
+    raise SystemExit(1) from _mongo_exc
 
 # ---------------------------------------------------------------------------
 # Internationalisation
