@@ -11,8 +11,8 @@ from .documents import User
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(min_length=8, write_only=True)
-    first_name = serializers.CharField(max_length=100, required=False, default='')
-    last_name = serializers.CharField(max_length=100, required=False, default='')
+    first_name = serializers.CharField(max_length=100, required=False, default='', allow_blank=True)
+    last_name = serializers.CharField(max_length=100, required=False, default='', allow_blank=True)
 
     def validate_email(self, value: str) -> str:
         normalised = value.lower()
@@ -39,8 +39,8 @@ class LoginSerializer(serializers.Serializer):
 class UserProfileSerializer(serializers.Serializer):
     id = serializers.SerializerMethodField()
     email = serializers.EmailField(read_only=True)
-    first_name = serializers.CharField(max_length=100, required=False)
-    last_name = serializers.CharField(max_length=100, required=False)
+    first_name = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    last_name = serializers.CharField(max_length=100, required=False, allow_blank=True)
     phone_number = serializers.CharField(max_length=20, required=False, allow_blank=True)
     bio = serializers.CharField(required=False, allow_blank=True)
     date_joined = serializers.DateTimeField(read_only=True)
