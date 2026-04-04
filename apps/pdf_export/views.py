@@ -1,6 +1,6 @@
 """
 PDF Export views for TezCV.uz.
-Fetches CV documents from MongoDB, renders HTML templates, returns PDF via WeasyPrint.
+Fetches CV documents from MongoDB, renders HTML templates, returns PDF via xhtml2pdf.
 """
 
 import io
@@ -16,11 +16,11 @@ from rest_framework.views import APIView
 from apps.cv.documents import CV
 
 try:
-    from weasyprint import HTML
-    WEASYPRINT_AVAILABLE = True
+    from xhtml2pdf import pisa
+    PDF_AVAILABLE = True
 except (ImportError, OSError):
-    WEASYPRINT_AVAILABLE = False
-    HTML = None
+    PDF_AVAILABLE = False
+    pisa = None
 
 
 TEMPLATE_MAP = {
@@ -113,11 +113,11 @@ class CVExportPDFView(APIView):
         if error:
             return error
 
-        if not WEASYPRINT_AVAILABLE:
+        if not PDF_AVAILABLE:
             return Response(
                 {
-                    'detail': 'PDF generation is not available. WeasyPrint is not installed.',
-                    'hint': 'Run: pip install WeasyPrint',
+                    'detail': 'PDF generation is not available. xhtml2pdf is not installed.',
+                    'hint': 'Run: pip install xhtml2pdf',
                 },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
@@ -128,7 +128,12 @@ class CVExportPDFView(APIView):
         html_string = render_to_string(template_name, context, request=request)
 
         pdf_file = io.BytesIO()
-        HTML(string=html_string, base_url=request.build_absolute_uri('/')).write_pdf(pdf_file)
+        result = pisa.CreatePDF(html_string, dest=pdf_file)
+        if result.err:
+            return Response(
+                {'detail': 'Failed to generate PDF.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
         pdf_file.seek(0)
 
         # Build a clean filename
